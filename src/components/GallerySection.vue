@@ -17,31 +17,63 @@ const open = (i) => (lightboxIndex.value = i)
 const close = () => (lightboxIndex.value = -1)
 const navigate = (i) => (lightboxIndex.value = i)
 
-/* ---- Masonry: size each tile's grid-row span from its rendered height.
-   Works with any aspect ratio (no cropping) and any column width. ---- */
+/* ---- Masonry: each tile spans N grid rows so varied aspect ratios sit
+   flush with no cropping. The height is derived from the tile's WIDTH and
+   the artwork's aspect ratio (width is reliable even before the image
+   loads, unlike the cell-constrained height), then refined to the image's
+   true ratio once it has loaded. ---- */
 const grid = ref(null)
 const ROW = 8 // must match grid-auto-rows in CSS (px)
 const GAP = 24 // must match grid gap in CSS (px)
 
+const sizeTile = (tile, ratio) => {
+  const w = tile.getBoundingClientRect().width
+  if (!w || !ratio) return
+  const h = w / ratio
+  const span = Math.max(1, Math.ceil((h + GAP) / (ROW + GAP)))
+  tile.style.gridRowEnd = `span ${span}`
+}
+
 const resizeSpans = () => {
   const el = grid.value
   if (!el) return
-  for (const tile of el.querySelectorAll('.tile')) {
-    const h = tile.getBoundingClientRect().height
-    tile.style.gridRowEnd = `span ${Math.ceil((h + GAP) / (ROW + GAP))}`
-  }
+  el.querySelectorAll('.tile').forEach((tile, i) => {
+    const art = filtered.value[i]
+    if (!art) return
+    const im = tile.querySelector('img')
+    const ratio =
+      im && im.naturalWidth && im.naturalHeight
+        ? im.naturalWidth / im.naturalHeight
+        : art.aspect || 1
+    sizeTile(tile, ratio)
+  })
+}
+
+// Re-measure once each image has decoded (true ratio may differ slightly
+// from the declared one) so the layout settles precisely.
+const attachImageListeners = () => {
+  grid.value?.querySelectorAll('.tile img').forEach((im) => {
+    if (im.complete) return
+    im.addEventListener('load', resizeSpans, { once: true })
+  })
 }
 
 let ro
 onMounted(() => {
   resizeSpans()
+  attachImageListeners()
   ro = new ResizeObserver(resizeSpans)
   ro.observe(grid.value)
 })
 onUnmounted(() => ro?.disconnect())
 
 // Recompute after the filtered list re-renders.
-watch(filtered, () => nextTick(resizeSpans))
+watch(filtered, () =>
+  nextTick(() => {
+    resizeSpans()
+    attachImageListeners()
+  }),
+)
 </script>
 
 <template>
@@ -73,6 +105,7 @@ watch(filtered, () => nextTick(resizeSpans))
         <button
           v-for="(art, i) in filtered"
           :key="art.id"
+          v-reveal="Math.min(i, 7) * 55"
           class="tile"
           :class="{ feature: art.feature }"
           @click="open(i)"
