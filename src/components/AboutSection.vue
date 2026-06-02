@@ -202,10 +202,20 @@ import kinjalDave from '../assets/veer-with-kinjal-dave.jpg'
   }
   .about-portrait {
     max-width: 100%;
+    order: 1;
+  }
+  .about-body {
+    order: -1;
   }
   .celeb-content {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  .celeb-card {
+    order: 1;
+  }
+  .celeb-text {
+    order: -1;
   }
 }
 
