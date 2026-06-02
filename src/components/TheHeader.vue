@@ -85,7 +85,7 @@ onUnmounted(() => {
 }
 
 .site-header.is-scrolled {
-  background: rgba(246, 244, 238, 0.85);
+  background: var(--header-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom-color: var(--line);
@@ -210,7 +210,7 @@ onUnmounted(() => {
     justify-content: center;
     align-items: center;
     gap: 0;
-    background: rgba(246, 244, 238, 0.97);
+    background: var(--header-bg-solid);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     opacity: 0;
