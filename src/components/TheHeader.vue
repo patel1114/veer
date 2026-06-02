@@ -5,24 +5,12 @@ import logo from '../assets/veer-art-logo.png'
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
-const isDark = ref(false)
 
 const links = [
   { label: 'Work', href: '#work' },
   { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ]
-
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
-}
 
 const onScroll = () => {
   scrolled.value = window.scrollY > 24
@@ -43,55 +31,19 @@ const onClickOutside = (e) => {
   }
 }
 
-let mediaQuery = null
-
-const handleSystemThemeChange = (e) => {
-  // If user actively changes system theme, keep the site in perfect sync!
-  isDark.value = e.matches
-  if (e.matches) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-  // Clear localStorage override on system settings shift so they stay aligned
-  localStorage.removeItem('theme')
-}
-
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
   document.addEventListener('click', onClickOutside)
 
-  // Initialise theme based on local storage or system preference
-  const savedTheme = localStorage.getItem('theme')
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  
-  if (savedTheme === 'dark' || (!savedTheme && mediaQuery.matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  } else {
-    isDark.value = false
-    document.documentElement.classList.remove('dark')
-  }
-
-  // Register modern media query listener with old browser support
-  if (mediaQuery.addEventListener) {
-    mediaQuery.addEventListener('change', handleSystemThemeChange)
-  } else {
-    mediaQuery.addListener(handleSystemThemeChange)
-  }
+  // Ensure dark class is cleanly wiped so it defaults to light editorial theme
+  document.documentElement.classList.remove('dark')
+  localStorage.removeItem('theme')
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   document.removeEventListener('click', onClickOutside)
-  if (mediaQuery) {
-    if (mediaQuery.removeEventListener) {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange)
-    } else {
-      mediaQuery.removeListener(handleSystemThemeChange)
-    }
-  }
 })
 </script>
 
@@ -114,24 +66,6 @@ onUnmounted(() => {
       </nav>
 
       <div class="header-actions">
-        <!-- Premium Theme Toggle -->
-        <button class="theme-toggle" @click="toggleTheme" aria-label="Toggle theme">
-          <svg v-if="isDark" class="sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg v-else class="moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-
         <button
           class="menu-toggle"
           :aria-expanded="menuOpen"
@@ -225,29 +159,7 @@ onUnmounted(() => {
   z-index: 2;
 }
 
-/* Premium theme toggle */
-.theme-toggle {
-  background: transparent;
-  border: none;
-  color: var(--ink-soft);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.3s var(--spring);
-}
 
-.theme-toggle:hover {
-  background: var(--paper-2);
-  color: var(--accent);
-  transform: scale(1.1) rotate(15deg);
-}
-
-.theme-toggle svg {
-  display: block;
-}
 
 /* Mobile menu toggle */
 .menu-toggle {

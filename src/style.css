@@ -347,66 +347,7 @@ p { margin: 0; }
   }
 }
 
-/* ============================================================
-   DARK MODE — Premium Night Gallery Experience
-   ============================================================ */
-.dark {
-  --paper: #12110e;      /* Deep rich charcoal black */
-  --paper-2: #1c1b17;    /* Slightly lighter dark background */
-  --ink: #f6f4ee;        /* Creamy white for primary titles */
-  --ink-soft: #d3cfc4;   /* Soft warm grey for readable body copy */
-  --ink-mute: #8c877a;   /* Muted warm grey for captions/borders */
-  --line: #2d2b25;       /* Fine dark borders */
-  --accent: #e26f53;     /* Highly visible warm coral red */
-  --accent-soft: rgba(226, 111, 83, 0.15);
-  --overlay: rgba(10, 9, 8, 0.96);
-  --header-bg: rgba(18, 17, 14, 0.82);
-  --header-bg-solid: rgba(18, 17, 14, 0.96);
-
-  color-scheme: dark;
-}
-
-/* Premium brand logo blending & inversion in light/dark modes */
+/* Premium brand logo blending for light background */
 .brand img {
   mix-blend-mode: multiply !important;
-  transition: filter 0.4s ease, mix-blend-mode 0.4s ease;
-}
-
-.dark .brand img {
-  filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.1) !important;
-  mix-blend-mode: screen !important;
-}
-
-/* Soften white background elements like the intro load text */
-.dark .intro-screen {
-  background: #0a0908;
-}
-.dark .intro-name {
-  color: #eceae2;
-}
-
-/* Fine adjustments for gallery tiles and overlays in dark mode */
-.dark .tile {
-  background: var(--paper-2);
-  border-color: var(--line);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-}
-
-.dark .tile:hover {
-  box-shadow: 0 24px 56px -16px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Make sure inputs and scroll cues adjust */
-.dark .scroll-cue {
-  color: var(--ink-mute) !important;
-}
-
-/* Testimonials and cards */
-.dark .celeb-img-wrap {
-  box-shadow: 0 24px 56px -20px rgba(0, 0, 0, 0.7);
-}
-
-/* Whatsapp button hover shadow adjustment */
-.dark .btn--wa:hover {
-  box-shadow: 0 12px 28px -8px rgba(37, 211, 102, 0.25);
 }
