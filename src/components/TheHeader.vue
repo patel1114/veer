@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { site } from '../data/site'
 import logo from '../assets/veer-art-logo.png'
 
@@ -14,13 +14,32 @@ const links = [
 
 const onScroll = () => {
   scrolled.value = window.scrollY > 24
+  // Auto-close menu on scroll
+  if (menuOpen.value && window.scrollY > 100) {
+    menuOpen.value = false
+  }
+}
+
+const closeMenu = () => {
+  menuOpen.value = false
+}
+
+// Close menu when clicking outside
+const onClickOutside = (e) => {
+  if (menuOpen.value && !e.target.closest('.site-header')) {
+    menuOpen.value = false
+  }
 }
 
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
+  document.addEventListener('click', onClickOutside)
 })
-onUnmounted(() => window.removeEventListener('scroll', onScroll))
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+  document.removeEventListener('click', onClickOutside)
+})
 </script>
 
 <template>
@@ -36,7 +55,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           :key="link.href"
           :href="link.href"
           class="nav-link"
-          @click="menuOpen = false"
+          @click="closeMenu"
           >{{ link.label }}</a
         >
       </nav>
@@ -45,7 +64,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
         class="menu-toggle"
         :aria-expanded="menuOpen"
         aria-label="Toggle menu"
-        @click="menuOpen = !menuOpen"
+        @click.stop="menuOpen = !menuOpen"
       >
         <span :class="{ open: menuOpen }"></span>
       </button>
@@ -66,8 +85,9 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 }
 
 .site-header.is-scrolled {
-  background: rgba(246, 244, 238, 0.82);
-  backdrop-filter: blur(10px);
+  background: rgba(246, 244, 238, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom-color: var(--line);
 }
 
@@ -75,15 +95,16 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 76px;
+  height: 72px;
 }
 
 .brand {
   display: flex;
   align-items: center;
+  z-index: 2;
 }
 .brand img {
-  height: 58px;
+  height: 52px;
   width: auto;
   display: block;
 }
@@ -127,25 +148,26 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .menu-toggle {
   display: none;
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   background: none;
   border: none;
   cursor: pointer;
+  z-index: 2;
 }
 .menu-toggle span,
 .menu-toggle span::before,
 .menu-toggle span::after {
   content: '';
   position: absolute;
-  left: 3px;
+  left: 6px;
   width: 24px;
   height: 1.5px;
   background: var(--ink);
   transition: transform 0.3s ease;
 }
 .menu-toggle span {
-  top: 14px;
+  top: 17px;
 }
 .menu-toggle span::before {
   top: -7px;
@@ -164,29 +186,54 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 }
 
 @media (max-width: 720px) {
-  .menu-toggle {
-    display: block;
+  .bar {
+    height: 64px;
   }
+
+  .brand img {
+    height: 44px;
+  }
+
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .nav {
-    position: absolute;
-    top: 76px;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 0;
-    background: var(--paper);
-    border-bottom: 1px solid var(--line);
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease;
+    background: rgba(246, 244, 238, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.35s ease,
+      visibility 0.35s ease;
+    z-index: 1;
   }
+
   .nav.open {
-    max-height: 240px;
+    opacity: 1;
+    visibility: visible;
   }
+
   .nav-link {
-    padding: 1.1rem var(--gutter);
-    border-top: 1px solid var(--line);
+    font-size: 1.5rem;
+    font-family: var(--display);
+    font-weight: 400;
+    padding: 1rem 0;
+    color: var(--ink);
   }
+
   .nav-link::after {
     display: none;
   }

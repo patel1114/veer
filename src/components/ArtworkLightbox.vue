@@ -21,10 +21,60 @@ const onKey = (e) => {
   else if (e.key === 'ArrowLeft') prev()
 }
 
+/* ---- Touch swipe support for mobile ---- */
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const swiping = ref(false)
+
+const onTouchStart = (e) => {
+  touchStartX.value = e.touches[0].clientX
+  touchStartY.value = e.touches[0].clientY
+  swiping.value = true
+}
+
+const onTouchEnd = (e) => {
+  if (!swiping.value) return
+  swiping.value = false
+  const dx = e.changedTouches[0].clientX - touchStartX.value
+  const dy = e.changedTouches[0].clientY - touchStartY.value
+  // Only trigger if horizontal swipe is dominant and > 50px
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+    if (dx < 0) next()
+    else prev()
+  }
+}
+
+/* ---- Mock client reviews ---- */
+const reviews = [
+  {
+    name: 'Priya M.',
+    location: 'Ahmedabad',
+    stars: 5,
+    text: 'Veer captured every detail of my father\'s portrait. It\'s now the centerpiece of our living room. Truly a treasure.',
+  },
+  {
+    name: 'Rohan S.',
+    location: 'Mumbai',
+    stars: 5,
+    text: 'I commissioned a couple portrait for our anniversary. My wife cried when she saw it. Worth every rupee.',
+  },
+  {
+    name: 'Anita D.',
+    location: 'Puri',
+    stars: 5,
+    text: 'The Jagannath drawing Veer made for our temple is breathtaking. People think it\'s printed!',
+  },
+  {
+    name: 'Karan P.',
+    location: 'Surat',
+    stars: 5,
+    text: 'Got a sketch of my daughter — the likeness is uncanny. Veer is incredibly patient and professional.',
+  },
+]
+
 onMounted(() => {
   document.addEventListener('keydown', onKey)
   document.body.classList.add('is-locked')
-  // move focus into the dialog for keyboard users
   dialog.value?.focus()
 })
 onUnmounted(() => {
@@ -32,7 +82,6 @@ onUnmounted(() => {
   document.body.classList.remove('is-locked')
 })
 
-// keep focus on the dialog when navigating between pieces
 watch(
   () => props.index,
   () => dialog.value?.focus(),
@@ -45,8 +94,10 @@ watch(
     class="lb"
     role="dialog"
     aria-modal="true"
-    :aria-label="`${current.title}, ${current.medium}, ${current.year}`"
+    :aria-label="`Artwork: ${current.title}`"
     @click.self="emit('close')"
+    @touchstart.passive="onTouchStart"
+    @touchend.passive="onTouchEnd"
   >
     <button class="lb-close" aria-label="Close" @click="emit('close')">
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
@@ -60,19 +111,33 @@ watch(
       </svg>
     </button>
 
-    <figure
+    <div
       ref="dialog"
       tabindex="-1"
       class="lb-stage"
       @click.stop
     >
-      <img :key="current.id" :src="current.image" :alt="current.title" />
-      <figcaption>
-        <span class="lb-title">{{ current.title }}</span>
-        <span class="lb-meta">{{ current.medium }} · {{ current.year }}</span>
-        <span class="lb-desc" v-if="current.description">{{ current.description }}</span>
-      </figcaption>
-    </figure>
+      <figure class="lb-figure">
+        <img :key="current.id" :src="current.image" :alt="current.title" />
+      </figure>
+
+      <!-- Client Reviews Section -->
+      <section class="lb-reviews">
+        <h3 class="lb-reviews-title">Client Reviews</h3>
+        <div class="lb-reviews-grid">
+          <article v-for="(review, ri) in reviews" :key="ri" class="review-card">
+            <div class="review-stars">
+              <span v-for="s in review.stars" :key="s" class="star">★</span>
+            </div>
+            <p class="review-text">"{{ review.text }}"</p>
+            <p class="review-author">
+              {{ review.name }}
+              <span class="review-location">{{ review.location }}</span>
+            </p>
+          </article>
+        </div>
+      </section>
+    </div>
 
     <button class="lb-nav next" aria-label="Next" @click="next">
       <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
@@ -81,6 +146,9 @@ watch(
     </button>
 
     <p class="lb-counter">{{ index + 1 }} / {{ items.length }}</p>
+
+    <!-- Mobile swipe hint -->
+    <p class="lb-swipe-hint">Swipe to navigate</p>
   </div>
 </template>
 
@@ -92,129 +160,270 @@ watch(
   background: var(--overlay);
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: center;
+  align-items: start;
   gap: clamp(8px, 3vw, 40px);
-  padding: clamp(20px, 5vw, 56px);
-  animation: lb-in 0.3s ease;
+  padding: clamp(16px, 4vw, 56px);
+  animation: lb-in 0.4s var(--ease-out-expo);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes lb-in {
   from {
     opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(20px);
   }
 }
 
 .lb-stage {
-  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  max-height: 100%;
+  gap: 2rem;
   outline: none;
+  padding-bottom: 60px;
 }
 
-.lb-stage img {
+.lb-figure {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.lb-figure img {
   max-width: 100%;
-  max-height: 72vh;
+  max-height: 65vh;
   width: auto;
   height: auto;
   object-fit: contain;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
-  animation: img-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: img-in 0.5s var(--spring);
+  border-radius: 2px;
 }
 
 @keyframes img-in {
   from {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.95);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 
-.lb-stage figcaption {
+/* ---- Client Reviews ---- */
+.lb-reviews {
+  width: 100%;
+  max-width: 800px;
+  padding-top: 1rem;
+}
+
+.lb-reviews-title {
   text-align: center;
-  color: var(--paper);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  max-width: 60ch;
-}
-
-.lb-title {
+  color: rgba(246, 244, 238, 0.9);
   font-family: var(--display);
-  font-size: 1.5rem;
-}
-.lb-meta {
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
-  color: rgba(246, 244, 238, 0.65);
-}
-.lb-desc {
-  font-style: italic;
-  color: rgba(246, 244, 238, 0.8);
-  margin-top: 0.25rem;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
 }
 
+.lb-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.review-card {
+  background: rgba(246, 244, 238, 0.07);
+  border: 1px solid rgba(246, 244, 238, 0.12);
+  border-radius: 12px;
+  padding: 1.25rem;
+  backdrop-filter: blur(8px);
+  transition: background 0.3s ease, border-color 0.3s ease;
+  animation: review-in 0.5s var(--spring) both;
+}
+
+.review-card:nth-child(1) { animation-delay: 0.2s; }
+.review-card:nth-child(2) { animation-delay: 0.3s; }
+.review-card:nth-child(3) { animation-delay: 0.4s; }
+.review-card:nth-child(4) { animation-delay: 0.5s; }
+
+@keyframes review-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.review-card:hover {
+  background: rgba(246, 244, 238, 0.12);
+  border-color: rgba(246, 244, 238, 0.2);
+}
+
+.review-stars {
+  margin-bottom: 0.6rem;
+}
+
+.star {
+  color: #f5c518;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+}
+
+.review-text {
+  color: rgba(246, 244, 238, 0.85);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.review-author {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(246, 244, 238, 0.7);
+  letter-spacing: 0.03em;
+}
+
+.review-location {
+  font-weight: 400;
+  margin-left: 0.4rem;
+  color: rgba(246, 244, 238, 0.45);
+}
+
+/* ---- Controls ---- */
 .lb-close,
 .lb-nav {
   background: none;
-  border: 1px solid rgba(246, 244, 238, 0.25);
+  border: 1px solid rgba(246, 244, 238, 0.2);
   border-radius: 999px;
   color: var(--paper);
   cursor: pointer;
   display: grid;
   place-items: center;
   transition:
-    background 0.25s ease,
-    border-color 0.25s ease;
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s var(--spring);
 }
 .lb-close:hover,
 .lb-nav:hover {
   background: rgba(246, 244, 238, 0.12);
-  border-color: rgba(246, 244, 238, 0.6);
+  border-color: rgba(246, 244, 238, 0.5);
+  transform: scale(1.08);
 }
 
 .lb-nav {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
+  position: sticky;
+  top: 50%;
 }
 
 .lb-close {
-  position: absolute;
-  top: clamp(16px, 4vw, 32px);
-  right: clamp(16px, 4vw, 32px);
-  width: 46px;
-  height: 46px;
+  position: fixed;
+  top: clamp(12px, 3vw, 28px);
+  right: clamp(12px, 3vw, 28px);
+  width: 44px;
+  height: 44px;
   z-index: 2;
 }
 
 .lb-counter {
-  position: absolute;
-  bottom: clamp(16px, 4vw, 28px);
+  position: fixed;
+  bottom: clamp(12px, 3vw, 24px);
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.8rem;
   letter-spacing: 0.15em;
-  color: rgba(246, 244, 238, 0.6);
+  color: rgba(246, 244, 238, 0.5);
 }
 
+.lb-swipe-hint {
+  display: none;
+}
+
+/* ---- Mobile ---- */
 @media (max-width: 680px) {
   .lb {
     grid-template-columns: 1fr;
+    padding: 12px;
+    padding-top: 56px;
+    align-items: start;
   }
+
   .lb-nav {
-    position: absolute;
-    bottom: 56px;
+    position: fixed;
+    bottom: 48px;
+    top: auto;
     z-index: 2;
+    width: 48px;
+    height: 48px;
   }
   .lb-nav.prev {
-    left: clamp(16px, 6vw, 40px);
+    left: 16px;
   }
   .lb-nav.next {
-    right: clamp(16px, 6vw, 40px);
+    right: 16px;
   }
-  .lb-stage img {
-    max-height: 62vh;
+
+  .lb-figure img {
+    max-height: 50vh;
+    width: 100%;
+  }
+
+  .lb-reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .review-card {
+    padding: 1rem;
+  }
+
+  .lb-swipe-hint {
+    display: block;
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(246, 244, 238, 0.35);
+    animation: hint-fade 3s ease forwards;
+  }
+
+  @keyframes hint-fade {
+    0%, 70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .lb-counter {
+    bottom: auto;
+    top: 18px;
+    left: 50%;
+  }
+}
+
+@media (max-width: 380px) {
+  .review-text {
+    font-size: 0.82rem;
+  }
+  .review-card {
+    padding: 0.8rem;
   }
 }
 </style>

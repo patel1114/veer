@@ -1,20 +1,22 @@
 <script setup>
 import { site, waUrl } from '../data/site'
 
-const primary = site.socials[0] // featured social (Instagram by default)
+const primary = site.socials[0]
 </script>
 
 <template>
   <section id="contact" class="section contact">
+    <hr class="section-divider" />
+
     <div class="container contact-inner">
       <p class="eyebrow" v-reveal>Commission a piece</p>
-      <h2 v-reveal="80">Order a sketch — or just follow the work.</h2>
-      <p class="lede" v-reveal="160">
+      <h2 v-reveal="120">Order a sketch — or just follow the work.</h2>
+      <p class="lede" v-reveal="240">
         Portraits, family keepsakes, devotional drawings. Send a quick message on
-        WhatsApp with the photo you'd like drawn and Veer will take it from there.
+        WhatsApp with the photo you'd like drawn and I will take it from there.
       </p>
 
-      <div class="contact-actions" v-reveal="220">
+      <div class="contact-actions" v-reveal.scale="360">
         <a :href="waUrl()" target="_blank" rel="noopener" class="btn btn--wa">
           <svg viewBox="0 0 32 32" width="18" height="18" aria-hidden="true">
             <path
@@ -24,21 +26,23 @@ const primary = site.socials[0] // featured social (Instagram by default)
           </svg>
           Order on WhatsApp
         </a>
-        <a :href="primary.url" target="_blank" rel="noopener" class="btn btn--ghost">
-          Follow on {{ primary.label }}
-        </a>
-        <a :href="`mailto:${site.email}`" class="link-underline email-link">
-          {{ site.email }}
+        <a :href="primary.url" target="_blank" rel="noopener" class="btn btn--insta">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+          </svg>
+          Follow on Instagram
         </a>
       </div>
 
-      <ul class="socials" v-reveal="280">
-        <li v-for="s in site.socials" :key="s.label">
-          <a :href="s.url" target="_blank" rel="noopener" class="link-underline">
-            {{ s.label }} <span class="handle">{{ s.handle }}</span>
-          </a>
-        </li>
-      </ul>
+      <div class="contact-info" v-reveal="480">
+        <a :href="`mailto:${site.email}`" class="link-underline email-link">
+          {{ site.email }}
+        </a>
+        <span class="divider">·</span>
+        <a :href="`tel:+91${site.whatsapp.slice(2)}`" class="link-underline phone-link">
+          +91 {{ site.whatsapp.slice(2, 7) }} {{ site.whatsapp.slice(7) }}
+        </a>
+      </div>
     </div>
   </section>
 </template>
@@ -46,6 +50,7 @@ const primary = site.socials[0] // featured social (Instagram by default)
 <style scoped>
 .contact {
   text-align: center;
+  overflow: hidden;
 }
 
 .contact-inner {
@@ -77,26 +82,48 @@ const primary = site.socials[0] // featured social (Instagram by default)
   background: #1ebe5b;
   border-color: #1ebe5b;
   color: #fff;
+  box-shadow: 0 12px 28px -8px rgba(37, 211, 102, 0.5);
 }
 
-.email-link {
+.contact-info {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.email-link,
+.phone-link {
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
 
-.socials {
-  list-style: none;
-  padding: 0;
-  margin: 3rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem 2.5rem;
+.divider {
+  color: var(--ink-mute);
 }
 
-.socials .handle {
-  color: var(--ink-mute);
-  font-weight: 400;
-  margin-left: 0.35rem;
+.btn--insta {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn--insta:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 12px 28px -8px rgba(220, 39, 67, 0.45);
+}
+
+@media (max-width: 480px) {
+  .contact-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .contact-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .divider { display: none; }
 }
 </style>

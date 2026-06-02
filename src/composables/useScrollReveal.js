@@ -1,19 +1,18 @@
 /* ============================================================
-   v-reveal — a tiny scroll-reveal directive.
+   v-reveal — dramatic scroll-reveal directive.
 
-   Usage in templates:
-     <div v-reveal>…</div>            fades/rises in when scrolled into view
-     <div v-reveal="120">…</div>      with a 120ms stagger delay
-
-   Styling lives in style.css under [data-reveal] / .is-visible.
-   Respects prefers-reduced-motion (elements just show, no animation).
+   Usage:
+     <div v-reveal>…</div>            slides UP 80px with blur
+     <div v-reveal="200">…</div>      with 200ms stagger delay
+     <div v-reveal.left>…</div>       slides from LEFT with rotation
+     <div v-reveal.right>…</div>      slides from RIGHT with rotation
+     <div v-reveal.scale>…</div>      scales UP from 70% with heavy blur
    ============================================================ */
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// One shared observer for every element — cheap and consistent.
 let observer
 
 const ensureObserver = () => {
@@ -27,7 +26,7 @@ const ensureObserver = () => {
         }
       }
     },
-    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+    { threshold: 0.05, rootMargin: '0px 0px -8% 0px' },
   )
   return observer
 }
@@ -35,9 +34,18 @@ const ensureObserver = () => {
 export const revealDirective = {
   mounted(el, binding) {
     el.setAttribute('data-reveal', '')
+
+    // Direction modifiers
+    if (binding.modifiers?.left) {
+      el.setAttribute('data-reveal-dir', 'left')
+    } else if (binding.modifiers?.right) {
+      el.setAttribute('data-reveal-dir', 'right')
+    } else if (binding.modifiers?.scale) {
+      el.setAttribute('data-reveal-dir', 'scale')
+    }
+
     if (binding.value) el.style.setProperty('--reveal-delay', `${binding.value}ms`)
 
-    // No IO support or reduced motion → reveal immediately.
     const io = ensureObserver()
     if (!io || prefersReducedMotion()) {
       el.classList.add('is-visible')

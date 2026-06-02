@@ -27,7 +27,7 @@ const year = new Date().getFullYear()
 <style scoped>
 .site-footer {
   border-top: 1px solid var(--line);
-  padding-block: 48px;
+  padding-block: 40px;
 }
 
 .footer-inner {
@@ -39,7 +39,7 @@ const year = new Date().getFullYear()
 }
 
 .brand img {
-  height: 72px;
+  height: 56px;
   width: auto;
   display: block;
 }
@@ -54,11 +54,29 @@ const year = new Date().getFullYear()
 }
 
 .copy {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--ink-mute);
   flex-basis: 100%;
   border-top: 1px solid var(--line);
-  padding-top: 1.5rem;
+  padding-top: 1.25rem;
   margin-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .brand img {
+    height: 48px;
+  }
+
+  .copy {
+    text-align: center;
+    font-size: 0.75rem;
+  }
 }
 </style>

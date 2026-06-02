@@ -1,19 +1,21 @@
 /* ============================================================
    Veer — Sketch Artist
-   Editorial design tokens + base styles
+   Editorial design tokens + base styles + DRAMATIC animations
    ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap');
 
 :root {
   /* Palette — warm "paper" editorial */
-  --paper: #f6f4ee; /* page background */
-  --paper-2: #efece3; /* recessed panels / placeholders */
-  --ink: #15140f; /* headings / primary text */
-  --ink-soft: #4a463d; /* body text */
-  --ink-mute: #8a8475; /* captions / meta */
-  --line: #ddd8cb; /* hairline borders */
-  --accent: #9a3b22; /* restrained terracotta accent */
+  --paper: #f6f4ee;
+  --paper-2: #efece3;
+  --ink: #15140f;
+  --ink-soft: #3d3a33;
+  --ink-mute: #7a7567;
+  --line: #ddd8cb;
+  --accent: #9a3b22;
   --accent-soft: rgba(154, 59, 34, 0.1);
-  --overlay: rgba(18, 17, 13, 0.94); /* lightbox backdrop */
+  --overlay: rgba(18, 17, 13, 0.94);
 
   /* Type */
   --display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
@@ -21,7 +23,13 @@
 
   /* Layout */
   --maxw: 1240px;
-  --gutter: clamp(20px, 5vw, 64px);
+  --gutter: clamp(16px, 5vw, 64px);
+
+  /* Animation curves — premium springs */
+  --spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
 
   color-scheme: light;
   color: var(--ink-soft);
@@ -34,6 +42,12 @@
   text-rendering: optimizeLegibility;
 }
 
+@media (max-width: 600px) {
+  :root {
+    font-size: 16px;
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -42,6 +56,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -56,7 +71,6 @@ body {
   overflow-x: hidden;
 }
 
-/* When the lightbox is open we lock background scroll */
 body.is-locked {
   overflow: hidden;
 }
@@ -76,11 +90,15 @@ a {
   color: var(--paper);
 }
 
-/* ---- Typography ------------------------------------------- */
+/* ---- Global focus ---- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 
-h1,
-h2,
-h3 {
+/* ---- Typography ---- */
+
+h1, h2, h3 {
   font-family: var(--display);
   color: var(--ink);
   font-weight: 400;
@@ -90,23 +108,12 @@ h3 {
   text-wrap: balance;
 }
 
-h1 {
-  font-size: clamp(2.75rem, 9vw, 6.5rem);
-}
+h1 { font-size: clamp(2.2rem, 8vw, 6.5rem); }
+h2 { font-size: clamp(1.75rem, 5vw, 3.5rem); }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.75rem); }
+p { margin: 0; }
 
-h2 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
-
-h3 {
-  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
-}
-
-p {
-  margin: 0;
-}
-
-/* ---- Shared layout helpers -------------------------------- */
+/* ---- Layout ---- */
 
 .container {
   width: 100%;
@@ -116,10 +123,10 @@ p {
 }
 
 .section {
-  padding-block: clamp(72px, 12vw, 160px);
+  padding-block: clamp(56px, 10vw, 160px);
+  position: relative;
 }
 
-/* Small caps eyebrow label used above section headings */
 .eyebrow {
   font-family: var(--sans);
   font-size: 0.75rem;
@@ -131,36 +138,60 @@ p {
 }
 
 .lede {
-  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
   color: var(--ink-soft);
   max-width: 52ch;
 }
 
-/* ---- Buttons / links -------------------------------------- */
+/* ---- Buttons ---- */
 
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6em;
   font-family: var(--sans);
   font-weight: 500;
   font-size: 0.95rem;
   padding: 0.85em 1.6em;
+  min-height: 48px;
   border-radius: 999px;
   border: 1px solid var(--ink);
   background: var(--ink);
   color: var(--paper);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition:
-    transform 0.25s ease,
-    background 0.25s ease,
-    color 0.25s ease;
+    transform 0.4s var(--spring),
+    background 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.4s var(--spring);
+}
+
+/* Magnetic shimmer on hover */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn:hover::before {
+  transform: translateX(100%);
 }
 
 .btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   background: var(--accent);
   border-color: var(--accent);
+  box-shadow: 0 12px 28px -8px rgba(154, 59, 34, 0.4);
+}
+
+.btn:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .btn--ghost {
@@ -172,9 +203,9 @@ p {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
+  box-shadow: 0 12px 28px -8px rgba(21, 20, 15, 0.3);
 }
 
-/* Underlined inline link with animated rule */
 .link-underline {
   position: relative;
   color: var(--ink);
@@ -199,33 +230,117 @@ p {
   transform-origin: left;
 }
 
-/* ---- Scroll reveal (driven by v-reveal directive) --------- */
+/* ============================================================
+   SCROLL REVEAL — Dramatic, visible animations
+   ============================================================ */
 
+/* Default: slide UP with blur */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(80px);
+  filter: blur(6px);
   transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 1s var(--spring),
+    transform 1.2s var(--spring),
+    filter 0.8s ease;
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
 }
 
 [data-reveal].is-visible {
   opacity: 1;
   transform: none;
+  filter: blur(0);
+}
+
+/* Slide from LEFT */
+[data-reveal-dir="left"] {
+  transform: translateX(-100px) rotate(-2deg);
+  filter: blur(6px);
+}
+[data-reveal-dir="left"].is-visible {
+  transform: none;
+  filter: blur(0);
+}
+
+/* Slide from RIGHT */
+[data-reveal-dir="right"] {
+  transform: translateX(100px) rotate(2deg);
+  filter: blur(6px);
+}
+[data-reveal-dir="right"].is-visible {
+  transform: none;
+  filter: blur(0);
+}
+
+/* Scale UP reveal */
+[data-reveal-dir="scale"] {
+  transform: scale(0.7);
+  filter: blur(10px);
+}
+[data-reveal-dir="scale"].is-visible {
+  transform: none;
+  filter: blur(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] {
     opacity: 1;
     transform: none;
+    filter: none;
     transition: none;
   }
 }
 
-/* ---- App shell -------------------------------------------- */
+/* ============================================================
+   ANIMATED DECORATIVE ELEMENTS
+   ============================================================ */
 
+/* Floating accent line used between sections */
+.section-divider {
+  display: block;
+  width: 100%;
+  height: 1px;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: divider-slide 3s ease-in-out infinite;
+}
+
+@keyframes divider-slide {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* ---- App shell ---- */
 #app {
   min-height: 100svh;
+}
+
+/* ---- Mobile button stacking ---- */
+@media (max-width: 480px) {
+  .section {
+    padding-block: clamp(40px, 8vw, 80px);
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
 }
