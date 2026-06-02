@@ -93,49 +93,41 @@ const navigate = (i) => (lightboxIndex.value = i)
 
 .filters {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-  padding-bottom: 4px;
-}
-
-@media (min-width: 600px) {
-  .filters { flex-wrap: wrap; }
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+  margin-bottom: 2.5rem;
 }
 
 .chip {
   font-family: var(--sans);
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 500;
-  padding: 0.55em 1.1em;
-  min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
+  letter-spacing: 0.05em;
+  padding: 0.75rem 0.5rem;
   background: transparent;
-  color: var(--ink-soft);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-mute);
   cursor: pointer;
   white-space: nowrap;
-  position: relative;
-  overflow: hidden;
+  margin-bottom: -1px;
   transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease,
-    transform 0.3s var(--spring),
-    box-shadow 0.3s var(--spring);
+    color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .chip:hover {
-  border-color: var(--ink);
   color: var(--ink);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(21, 20, 15, 0.1);
+  border-bottom-color: var(--line);
 }
 
 .chip.active {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
-  box-shadow: 0 4px 16px rgba(21, 20, 15, 0.2);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
 }
 
 /* ======================================================
@@ -209,13 +201,14 @@ const navigate = (i) => (lightboxIndex.value = i)
     padding-inline: var(--gutter);
   }
   .filters {
-    gap: 0.35rem;
-    padding-bottom: 8px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
   }
   .chip {
-    font-size: 0.78rem;
-    padding: 0.4em 0.85em;
-    min-height: 38px;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.2rem;
   }
 }
 
