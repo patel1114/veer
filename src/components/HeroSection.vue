@@ -45,7 +45,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
         <div class="hero-actions">
           <a href="#work" class="btn hero-btn" style="--bi:0">View the work</a>
-          <a href="#about" class="btn btn--ghost hero-btn" style="--bi:1">About me</a>
+          <a href="#contact" class="btn btn--ghost hero-btn" style="--bi:1">Order now</a>
         </div>
       </div>
 
