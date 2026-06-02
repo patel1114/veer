@@ -43,6 +43,20 @@ const onClickOutside = (e) => {
   }
 }
 
+let mediaQuery = null
+
+const handleSystemThemeChange = (e) => {
+  // If user actively changes system theme, keep the site in perfect sync!
+  isDark.value = e.matches
+  if (e.matches) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  // Clear localStorage override on system settings shift so they stay aligned
+  localStorage.removeItem('theme')
+}
+
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
@@ -50,19 +64,34 @@ onMounted(() => {
 
   // Initialise theme based on local storage or system preference
   const savedTheme = localStorage.getItem('theme')
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  
+  if (savedTheme === 'dark' || (!savedTheme && mediaQuery.matches)) {
     isDark.value = true
     document.documentElement.classList.add('dark')
   } else {
     isDark.value = false
     document.documentElement.classList.remove('dark')
   }
+
+  // Register modern media query listener with old browser support
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', handleSystemThemeChange)
+  } else {
+    mediaQuery.addListener(handleSystemThemeChange)
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   document.removeEventListener('click', onClickOutside)
+  if (mediaQuery) {
+    if (mediaQuery.removeEventListener) {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange)
+    } else {
+      mediaQuery.removeListener(handleSystemThemeChange)
+    }
+  }
 })
 </script>
 

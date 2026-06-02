@@ -366,9 +366,15 @@ p { margin: 0; }
   color-scheme: dark;
 }
 
-/* Invert dark brand logo PNG automatically into crisp white */
+/* Premium brand logo blending & inversion in light/dark modes */
+.brand img {
+  mix-blend-mode: multiply !important;
+  transition: filter 0.4s ease, mix-blend-mode 0.4s ease;
+}
+
 .dark .brand img {
-  filter: invert(1) brightness(1.2) contrast(1.1);
+  filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.1) !important;
+  mix-blend-mode: screen !important;
 }
 
 /* Soften white background elements like the intro load text */
