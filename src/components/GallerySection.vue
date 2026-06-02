@@ -203,6 +203,22 @@ const navigate = (i) => (lightboxIndex.value = i)
   }
 }
 
+@media (max-width: 600px) {
+  .filters-wrap {
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+  }
+  .filters {
+    gap: 0.35rem;
+    padding-bottom: 8px;
+  }
+  .chip {
+    font-size: 0.78rem;
+    padding: 0.4em 0.85em;
+    min-height: 38px;
+  }
+}
+
 @media (max-width: 480px) {
   .grid {
     columns: 2;
