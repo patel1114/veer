@@ -53,7 +53,6 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
         <div class="hero-art-frame">
           <img :src="featured" alt="One of my hyper-real graphite portraits" />
         </div>
-        <figcaption>The Camo Shirt — graphite on paper</figcaption>
       </figure>
     </div>
 
