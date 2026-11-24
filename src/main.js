@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import { revealDirective } from './composables/useScrollReveal'
+import { reveal, split } from './composables/directives'
 
-createApp(App).directive('reveal', revealDirective).mount('#app')
+createApp(App).directive('reveal', reveal).directive('split', split).mount('#app')

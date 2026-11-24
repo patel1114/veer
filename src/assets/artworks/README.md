@@ -14,16 +14,22 @@ entirely by `src/data/artworks.js` — adding or swapping a piece is quick.
    jumping while the picture loads.
 4. Update `title`, `medium`, `year`, and `category` while you're there.
 
+## Phone-sized copies (recommended)
+
+Phones load the 800px copies in `src/assets/artworks/sm/` (same filename as
+the full image). When you add a new drawing, also save an ~800px-wide copy
+there. If you skip it, the site still works and simply uses the full image.
+
 ## Notes
 
 - `category` must be one of the values in `CATEGORIES` (top of `artworks.js`):
   `Portraits`, `Couples & Family`, `Children`, `Devotional`. Add new ones there if needed.
-- Set `feature: true` on a piece to make it span larger in the gallery grid.
+- Set `feature: true` on a piece to show it taller in the horizontal gallery.
 - Use `pairWith: '<id>'` to mark a second photo of the same drawing (a detail
   shot or another angle) so it sits next to its companion.
 - For best quality/size, export photos around **1600px on the long edge** as
   `.webp` or `.jpg`.
-- The artist photo in the About section lives one level up at
-  `src/assets/veer-with-celebrity.jpg`, and the brand logo at
-  `src/assets/veer-art-logo.png` (also in `public/` for the favicon) — replace
+- The stage photos in the Recognition section live one level up at
+  `src/assets/veer-with-celebrity.jpg` and `veer-with-kinjal-dave.jpg`, and the brand logo (used as the favicon) at
+  `public/veer-art-logo.png` — replace
   those files (keep the names) to update them.

@@ -13,7 +13,7 @@ export const site = {
     'Hyper-real graphite & charcoal art — lifelike portraits, family keepsakes and devotional drawings, each one made entirely by hand.',
 
   // Contact — replace with real values.
-  email: 'veer81351@gmail.com',
+  email: 'veerpatel5415@gmail.com',
   location: 'Gujarat, India',
 
   // WhatsApp — primary commission channel.

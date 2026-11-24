@@ -1,257 +1,370 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
-import { site } from '../data/site'
-import logo from '../assets/veer-art-logo.png'
-
-const scrolled = ref(false)
-const menuOpen = ref(false)
+import WaIcon from './WaIcon.vue'
+import VaMark from './VaMark.vue'
+/* Minimal fixed header: typographic wordmark, rolling nav labels,
+   one clear CTA. Hides while scrolling down, returns on scroll up.
+   Mobile: full-screen menu with staggered oversized links. */
+import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { site, waUrl } from '../data/site'
+import { ui } from '../stores/ui'
+import { lockScroll, unlockScroll } from '../composables/motion'
 
 const links = [
-  { label: 'Work', href: '#work' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Work', href: '#work', n: '01' },
+  { label: 'Craft', href: '#craft', n: '02' },
+  { label: 'Recognition', href: '#recognition', n: '03' },
+  { label: 'Contact', href: '#contact', n: '04' },
 ]
 
+const hidden = ref(false)
+const scrolled = ref(false)
+const menuOpen = ref(false)
+let lastY = 0
+
 const onScroll = () => {
-  scrolled.value = window.scrollY > 24
-  // Auto-close menu on scroll
-  if (menuOpen.value && window.scrollY > 100) {
-    menuOpen.value = false
-  }
+  const y = window.scrollY
+  scrolled.value = y > 40
+  if (!menuOpen.value) hidden.value = y > lastY && y > 240
+  lastY = y
 }
 
-const closeMenu = () => {
-  menuOpen.value = false
-}
+const toggle = () => (menuOpen.value = !menuOpen.value)
+const close = () => (menuOpen.value = false)
+const onKey = (e) => e.key === 'Escape' && close()
 
-// Close menu when clicking outside
-const onClickOutside = (e) => {
-  if (menuOpen.value && !e.target.closest('.site-header')) {
-    menuOpen.value = false
-  }
-}
+watch(menuOpen, (open) => (open ? lockScroll() : unlockScroll()))
 
 onMounted(() => {
-  onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
-  document.addEventListener('click', onClickOutside)
-
-  // Ensure dark class is cleanly wiped so it defaults to light editorial theme
-  document.documentElement.classList.remove('dark')
-  localStorage.removeItem('theme')
+  document.addEventListener('keydown', onKey)
 })
-
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
-  document.removeEventListener('click', onClickOutside)
+  document.removeEventListener('keydown', onKey)
 })
 </script>
 
 <template>
-  <header class="site-header" :class="{ 'is-scrolled': scrolled }">
-    <div class="container bar">
-      <a href="#top" class="brand" aria-label="Veer Art — home">
-        <img :src="logo" alt="Veer Art" />
+  <header
+    class="hdr"
+    :class="{ 'is-hidden': hidden && !ui.viewer.open, 'is-scrolled': scrolled, 'is-ready': ui.introDone, 'menu-open': menuOpen }"
+  >
+    <div class="hdr-bar">
+      <a href="#top" class="mark" aria-label="Veer Art — back to top" @click="close">
+        <span class="mark-va"><VaMark /></span>
+        <span class="mark-text">
+          <span class="mark-name">Veer Art</span>
+          <span class="mark-sub label">Graphite portraits</span>
+        </span>
       </a>
 
-      <nav class="nav" :class="{ open: menuOpen }" aria-label="Primary">
-        <a
-          v-for="link in links"
-          :key="link.href"
-          :href="link.href"
-          class="nav-link"
-          @click="closeMenu"
-          >{{ link.label }}</a
-        >
+      <nav class="nav" aria-label="Primary">
+        <a v-for="l in links" :key="l.href" :href="l.href" class="nav-link">
+          <span class="roll"><span>{{ l.label }}</span><span aria-hidden="true">{{ l.label }}</span></span>
+        </a>
       </nav>
 
-      <div class="header-actions">
-        <button
-          class="menu-toggle"
-          :aria-expanded="menuOpen"
-          aria-label="Toggle menu"
-          @click.stop="menuOpen = !menuOpen"
-        >
-          <span :class="{ open: menuOpen }"></span>
+      <div class="hdr-actions">
+        <a :href="waUrl()" target="_blank" rel="noopener" class="pill pill--wa hdr-cta">
+          <WaIcon />
+          <span class="roll"><span>Order a sketch</span><span aria-hidden="true">Order a sketch</span></span>
+        </a>
+        <button class="burger" :aria-expanded="menuOpen" aria-controls="mobile-menu" aria-label="Menu" @click="toggle">
+          <span></span><span></span>
         </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="mm" :class="{ open: menuOpen }" :inert="!menuOpen">
+      <nav class="mm-nav" aria-label="Mobile">
+        <a
+          v-for="(l, i) in links"
+          :key="l.href"
+          :href="l.href"
+          class="mm-link"
+          :style="{ '--i': i }"
+          @click="close"
+        >
+          <span class="label">{{ l.n }}</span>
+          <span class="mm-text">{{ l.label }}</span>
+        </a>
+      </nav>
+      <div class="mm-foot">
+        <a :href="waUrl()" target="_blank" rel="noopener" class="pill pill--wa mm-cta" @click="close">
+          <WaIcon />
+          Order a sketch on WhatsApp <span class="arrow">→</span>
+        </a>
+        <div class="mm-quick">
+          <a :href="`tel:+${site.whatsapp}`" class="label">Call</a>
+          <a :href="site.socials[0].url" target="_blank" rel="noopener" class="label">Instagram</a>
+          <a :href="`mailto:${site.email}`" class="label">Email</a>
+        </div>
       </div>
     </div>
   </header>
 </template>
 
 <style scoped>
-.site-header {
+.hdr {
   position: fixed;
   inset: 0 0 auto 0;
-  z-index: 50;
-  transition:
-    background 0.35s ease,
-    border-color 0.35s ease,
-    backdrop-filter 0.35s ease;
-  border-bottom: 1px solid transparent;
+  z-index: 100;
+  visibility: hidden;
+  transition: transform 0.7s var(--ease-out);
 }
 
-.site-header.is-scrolled {
-  background: var(--header-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom-color: var(--line);
+.hdr.is-ready {
+  visibility: visible;
 }
 
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 72px;
+.hdr.is-ready .hdr-bar {
+  animation: hdr-in 1s var(--ease-out) 0.9s backwards;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
+@keyframes hdr-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.hdr.is-ready.is-hidden {
+  transform: translateY(-110%);
+}
+
+.hdr-bar {
+  position: relative;
   z-index: 2;
+  height: var(--header-h);
+  padding-inline: var(--gutter);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  transition:
+    background-color 0.5s ease,
+    backdrop-filter 0.5s ease;
 }
-.brand img {
-  height: 52px;
-  width: auto;
-  display: block;
+
+.is-scrolled .hdr-bar {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+.menu-open .hdr-bar {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-self: start;
+}
+
+/* the VA monogram from the Veer Art logo */
+.mark-va {
+  height: 34px;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.mark:hover .mark-va {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.mark-text {
+  display: grid;
+  gap: 0.2rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--line-strong);
+}
+
+.mark-name {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.mark-sub {
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .mark-va {
+    height: 30px;
+  }
+  .mark-name {
+    font-size: 0.88rem;
+  }
 }
 
 .nav {
   display: flex;
-  gap: 2.5rem;
+  gap: 2.25rem;
 }
 
 .nav-link {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-  position: relative;
-  padding: 0.25rem 0;
-  transition: color 0.25s ease;
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease;
+  font-size: 0.9rem;
+  color: var(--fg-soft);
+  transition: color 0.3s ease;
 }
 
 .nav-link:hover {
-  color: var(--ink);
-}
-.nav-link:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+  color: var(--fg);
 }
 
-/* Header actions layout */
-.header-actions {
+.hdr-actions {
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  z-index: 2;
 }
 
+.hdr-cta {
+  min-height: 42px;
+  padding: 0 1.15rem;
+  font-size: 0.85rem;
+}
 
-
-/* Mobile menu toggle */
-.menu-toggle {
+.burger {
   display: none;
-  position: relative;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.menu-toggle span,
-.menu-toggle span::before,
-.menu-toggle span::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  width: 24px;
-  height: 1.5px;
-  background: var(--ink);
-  transition: transform 0.3s ease;
-}
-.menu-toggle span {
-  top: 17px;
-}
-.menu-toggle span::before {
-  top: -7px;
-}
-.menu-toggle span::after {
-  top: 7px;
-}
-.menu-toggle span.open {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
   background: transparent;
-}
-.menu-toggle span.open::before {
-  transform: translateY(7px) rotate(45deg);
-}
-.menu-toggle span.open::after {
-  transform: translateY(-7px) rotate(-45deg);
+  cursor: pointer;
+  position: relative;
 }
 
-@media (max-width: 720px) {
-  .bar {
-    height: 64px;
-  }
+.burger span {
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  height: 1.5px;
+  background: var(--fg);
+  transition: transform 0.5s var(--ease-out);
+}
 
-  .brand img {
-    height: 44px;
-  }
+.burger span:first-child {
+  top: 18px;
+}
+.burger span:last-child {
+  top: 24px;
+}
 
-  .menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.menu-open .burger span:first-child {
+  transform: translateY(3px) rotate(45deg);
+}
+.menu-open .burger span:last-child {
+  transform: translateY(-3px) rotate(-45deg);
+}
 
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0;
-    background: var(--header-bg-solid);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity 0.35s ease,
-      visibility 0.35s ease;
-    z-index: 1;
-  }
+/* ---- Mobile menu ---- */
+.mm {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--bg);
+  padding: calc(var(--header-h) + 4vh) var(--gutter) var(--gutter);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s var(--ease-in-out);
+}
 
-  .nav.open {
-    opacity: 1;
-    visibility: visible;
-  }
+.mm.open {
+  clip-path: inset(0 0 0 0);
+}
 
-  .nav-link {
-    font-size: 1.5rem;
-    font-family: var(--display);
-    font-weight: 400;
-    padding: 1rem 0;
-    color: var(--ink);
-  }
+.mm-nav {
+  display: flex;
+  flex-direction: column;
+}
 
-  .nav-link::after {
+.mm-link {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.mm-text {
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 12vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  transform: translateY(110%);
+  transition: transform 0.9s var(--ease-out);
+  transition-delay: calc(var(--i) * 70ms + 150ms);
+}
+
+.mm.open .mm-text {
+  transform: none;
+}
+
+.mm-foot {
+  display: grid;
+  gap: 1rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease 0.45s,
+    transform 0.8s var(--ease-out) 0.45s;
+}
+
+.mm.open .mm-foot {
+  opacity: 1;
+  transform: none;
+}
+
+.mm-cta {
+  justify-content: center;
+  min-height: 56px;
+}
+
+.mm-quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+}
+
+.mm-quick a {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  color: var(--fg-soft);
+}
+
+.mm-quick a + a {
+  border-left: 1px solid var(--line);
+}
+
+@media (min-width: 901px) {
+  .mm {
     display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .hdr-bar {
+    grid-template-columns: 1fr auto;
+  }
+  .nav,
+  .hdr-cta {
+    display: none;
+  }
+  .burger {
+    display: block;
   }
 }
 </style>

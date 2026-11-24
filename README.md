@@ -40,21 +40,30 @@ URL. Every subsequent `npm run deploy` ships a new production build.
 
 | What you want to change | File |
 | --- | --- |
-| Name, role, tagline, email, social links | `src/data/site.js` |
-| The gallery — which sketches show, titles, mediums | `src/data/artworks.js` |
-| How to add/replace real sketch images | `src/assets/artworks/README.md` |
-| Bio / artist statement & facts | `src/components/AboutSection.vue` |
-| Artist photo | `src/assets/artist-portrait.svg` (replace, keep name) |
-
-Anything marked `TODO` in the code is a placeholder to replace with Veer's
-real details (email, Instagram handle, bio).
+| Name, tagline, intro, email, WhatsApp, Instagram | `src/data/site.js` |
+| The drawings — order, titles, mediums, descriptions | `src/data/artworks.js` |
+| How to add/replace sketch images | `src/assets/artworks/README.md` |
+| Artist statement | `src/components/StatementSection.vue` |
+| Process steps ("Share a photo" …) | `src/components/CraftSection.vue` |
+| Stage / celebrity moments | `src/components/RecognitionSection.vue` |
+| Colours, fonts, spacing tokens | top of `src/style.css` |
 
 ## Structure
 
-Single scrolling page: **Hero → Gallery → About → Contact**, composed in
-`src/App.vue`. Sections live in `src/components/`. Scroll-reveal animations come
-from the global `v-reveal` directive (`src/composables/useScrollReveal.js`) and
-respect `prefers-reduced-motion`.
+Single scrolling page, composed in `src/App.vue`:
 
-The gallery uses elegant SVG placeholders so it looks finished before real
-artwork arrives — see `src/assets/artworks/README.md` to swap them in.
+**Preloader → Hero (self-drawing sketch) → Marquee → Statement → Work
+(horizontal gallery) → Craft (zoom-in proof, paper theme) → What I draw →
+Recognition → Contact → Footer**, plus a full-screen artwork viewer with a
+magnifying loupe.
+
+Motion stack: [GSAP](https://gsap.com) + ScrollTrigger for scroll-driven
+animation, [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
+(`src/composables/motion.js`). `v-reveal` and `v-split` directives
+(`src/composables/directives.js`) handle entrance animations. Everything
+respects `prefers-reduced-motion`; the custom cursor only appears on mouse /
+trackpad devices.
+
+The hero's sketch effect (`src/components/SketchCanvas.vue`) is generated live
+from the real drawing with an edge-detection pass — swap the image in
+`HeroSection.vue` and the effect follows.

@@ -1,82 +1,123 @@
 <script setup>
+/* Footer: live studio clock (IST), back-to-top, and an oversized
+   wordmark that rises into place as the page ends. */
+import { onMounted, onUnmounted, ref } from 'vue'
 import { site } from '../data/site'
-import logo from '../assets/veer-art-logo.png'
+
 const year = new Date().getFullYear()
+const time = ref('')
+let t
+
+const fmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Kolkata',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+const tick = () => (time.value = fmt.format(new Date()))
+
+onMounted(() => {
+  tick()
+  t = setInterval(tick, 15000)
+})
+onUnmounted(() => clearInterval(t))
 </script>
 
 <template>
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <a href="#top" class="brand" aria-label="Veer Art — back to top">
-        <img :src="logo" alt="Veer Art" />
+  <footer id="site-footer" class="ftr">
+    <div class="wrap ftr-top">
+      <div>
+        <span class="label">Studio time</span>
+        <p>{{ time }} IST · {{ site.location }}</p>
+      </div>
+      <div>
+        <span class="label">Follow the work</span>
+        <p>
+          <a v-for="s in site.socials" :key="s.label" :href="s.url" target="_blank" rel="noopener">
+            <span class="roll"><span>{{ s.handle }}</span><span aria-hidden="true">{{ s.handle }}</span></span>
+          </a>
+        </p>
+      </div>
+      <a href="#top" class="to-top">
+        <span class="roll"><span>Back to top ↑</span><span aria-hidden="true">Back to top ↑</span></span>
       </a>
+    </div>
 
-      <ul class="footer-socials">
-        <li v-for="s in site.socials" :key="s.label">
-          <a :href="s.url" target="_blank" rel="noopener" class="link-underline">{{
-            s.label
-          }}</a>
-        </li>
-      </ul>
+    <div class="wordmark" aria-hidden="true">
+      <span v-reveal>Veer</span>
+    </div>
 
-      <p class="copy">© {{ year }} {{ site.name }}. All drawings are original works.</p>
+    <div class="wrap ftr-bottom">
+      <span class="label">© {{ year }} {{ site.name }} Art — all drawings are original works</span>
+      <span class="label">Graphite · Charcoal · Paper</span>
     </div>
   </footer>
 </template>
 
 <style scoped>
-.site-footer {
+.ftr {
   border-top: 1px solid var(--line);
-  padding-block: 40px;
+  padding-top: clamp(32px, 4vw, 56px);
+  overflow: hidden;
 }
 
-.footer-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+.ftr-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--gutter);
+  align-items: start;
 }
 
-.brand img {
-  height: 56px;
-  width: auto;
-  display: block;
+.ftr-top p {
+  margin-top: 0.4rem;
+  color: var(--fg-soft);
 }
 
-.footer-socials {
-  list-style: none;
-  display: flex;
-  gap: 1.75rem;
-  padding: 0;
-  margin: 0;
+.to-top {
   font-size: 0.9rem;
+  color: var(--fg-soft);
 }
 
-.copy {
-  font-size: 0.8rem;
-  color: var(--ink-mute);
-  flex-basis: 100%;
+.wordmark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 34vw;
+  line-height: 0.75;
+  letter-spacing: -0.06em;
+  text-align: center;
+  margin-top: clamp(32px, 6vw, 80px);
+  overflow: hidden;
+  padding-top: 0.04em;
+}
+
+.wordmark span {
+  display: inline-block;
+  background: linear-gradient(180deg, var(--fg) 30%, var(--fg-mute));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wordmark :deep([data-reveal]) {
+  transform: translate3d(0, 40%, 0);
+  transition-duration: 1.4s, 1.6s;
+}
+
+.wordmark :deep([data-reveal].is-in) {
+  transform: none;
+}
+
+.ftr-bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1.25rem;
   border-top: 1px solid var(--line);
-  padding-top: 1.25rem;
-  margin-top: 0.5rem;
 }
 
-@media (max-width: 480px) {
-  .footer-inner {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  .brand img {
-    height: 48px;
-  }
-
-  .copy {
-    text-align: center;
-    font-size: 0.75rem;
+@media (max-width: 700px) {
+  .ftr-top {
+    grid-template-columns: 1fr;
   }
 }
 </style>
