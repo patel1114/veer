@@ -43,7 +43,7 @@ onUnmounted(() => clearInterval(t))
     </div>
 
     <div class="wordmark" aria-hidden="true">
-      <span v-reveal>Veer</span>
+      <span v-reveal>Veer Art</span>
     </div>
 
     <div class="wrap ftr-bottom">
@@ -80,9 +80,10 @@ onUnmounted(() => clearInterval(t))
 .wordmark {
   font-family: var(--serif);
   font-style: italic;
-  font-size: 34vw;
-  line-height: 0.75;
-  letter-spacing: -0.06em;
+  font-size: 19vw;
+  line-height: 0.8;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
   text-align: center;
   margin-top: clamp(32px, 6vw, 80px);
   overflow: hidden;
@@ -91,6 +92,8 @@ onUnmounted(() => clearInterval(t))
 
 .wordmark span {
   display: inline-block;
+  /* room for the italic overhang so the last letter isn't clipped */
+  padding-inline: 0.06em 0.12em;
   background: linear-gradient(180deg, var(--fg) 30%, var(--fg-mute));
   -webkit-background-clip: text;
   background-clip: text;
