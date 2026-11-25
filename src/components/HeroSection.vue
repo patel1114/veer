@@ -176,6 +176,9 @@ onUnmounted(() => ctx?.revert())
 
 .hero-art-frame {
   aspect-ratio: var(--hero-ar);
+  /* contain the drawing's intro zoom — without this the scaled drawing
+     widens the page on phones and everything shifts off-centre */
+  overflow: hidden;
   clip-path: inset(100% 0 0 0);
   transition: clip-path 1.5s var(--ease-in-out) 0.25s;
   box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.8);
