@@ -81,23 +81,22 @@ onUnmounted(() => clearInterval(t))
   font-family: var(--serif);
   font-style: italic;
   font-size: 19vw;
-  line-height: 0.8;
-  letter-spacing: -0.045em;
+  font-weight: 500; /* heavier hairlines so it reads on dark */
+  line-height: 1;
+  letter-spacing: -0.035em;
   white-space: nowrap;
   text-align: center;
   margin-top: clamp(32px, 6vw, 80px);
   overflow: hidden;
-  padding-top: 0.04em;
+  /* room above and below so no part of the letters is clipped */
+  padding-block: 0.02em 0.06em;
 }
 
 .wordmark span {
   display: inline-block;
   /* room for the italic overhang so the last letter isn't clipped */
   padding-inline: 0.06em 0.12em;
-  background: linear-gradient(180deg, var(--fg) 30%, var(--fg-mute));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--fg);
 }
 
 .wordmark :deep([data-reveal]) {
