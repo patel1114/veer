@@ -18,10 +18,10 @@ const ICONS = {
 }
 
 const rows = [
-  { k: 'WhatsApp', v: phone, href: waUrl(), ext: true, icon: ICONS.whatsapp, wa: true },
-  { k: 'Call', v: phone, href: `tel:+${site.whatsapp}`, icon: ICONS.call },
-  { k: 'Email', v: site.email, href: `mailto:${site.email}`, icon: ICONS.email },
-  { k: 'Instagram', v: insta.handle, href: insta.url, ext: true, icon: ICONS.instagram },
+  { k: 'WhatsApp', v: phone, href: waUrl(), ext: true, icon: ICONS.whatsapp, brand: 'wa' },
+  { k: 'Call', v: phone, href: `tel:+${site.whatsapp}`, icon: ICONS.call, brand: 'call' },
+  { k: 'Email', v: site.email, href: `mailto:${site.email}`, icon: ICONS.email, brand: 'mail' },
+  { k: 'Instagram', v: insta.handle, href: insta.url, ext: true, icon: ICONS.instagram, brand: 'ig' },
 ]
 
 let xTo, yTo, ixTo, iyTo
@@ -87,7 +87,7 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
     <ul class="c-rows">
       <li v-for="(r, i) in rows" :key="r.k" v-reveal="i * 90">
         <a :href="r.href" :target="r.ext ? '_blank' : undefined" :rel="r.ext ? 'noopener' : undefined" class="c-row">
-          <span class="c-ico" :class="{ 'c-ico--wa': r.wa }" aria-hidden="true">
+          <span class="c-ico" :class="`c-ico--${r.brand}`" aria-hidden="true">
             <svg :viewBox="r.icon.vb" width="22" height="22">
               <path
                 :d="r.icon.d"
@@ -225,21 +225,41 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
     border-color 0.4s ease;
 }
 
+/* each channel in its real brand colour, filled */
+.c-ico--wa,
+.c-ico--call,
+.c-ico--mail,
+.c-ico--ig {
+  border: 0;
+  color: #fff;
+}
+
 .c-ico--wa {
-  color: var(--wa);
-  border-color: rgba(37, 211, 102, 0.45);
+  background: #25d366; /* WhatsApp */
+}
+
+.c-ico--call {
+  background: #34c759; /* phone app green */
+}
+
+.c-ico--mail {
+  background: #ea4335; /* Gmail red */
+}
+
+.c-ico--ig {
+  /* Instagram gradient */
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+}
+
+.c-ico {
+  transition:
+    transform 0.4s var(--ease-out),
+    box-shadow 0.4s ease;
 }
 
 .c-row:hover .c-ico {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
-}
-
-.c-row:hover .c-ico--wa {
-  background: var(--wa);
-  color: var(--wa-ink);
-  border-color: var(--wa);
+  transform: scale(1.08);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.7);
 }
 
 /* the clean text face with even-width figures: numbers and the email
