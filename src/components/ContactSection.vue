@@ -9,11 +9,19 @@ const disc = ref(null)
 const phone = `+91 ${site.whatsapp.slice(2, 7)} ${site.whatsapp.slice(7)}`
 const insta = site.socials[0]
 
+/* 24×24 line icons (stroke) — WhatsApp uses the filled brand glyph */
+const ICONS = {
+  whatsapp: { fill: true, vb: '0 0 32 32', d: 'M16.1 4C9.43 4 4 9.43 4 16.1c0 2.3.66 4.546 1.92 6.5L4 28.575l6.32-1.65a12.05 12.05 0 0 0 5.78 1.46h.014c6.67 0 12.087-5.4 12.087-12.07 0-3.227-1.26-6.27-3.54-8.555A12.05 12.05 0 0 0 16.1 4zm0 22.13c-1.95 0-3.85-.53-5.51-1.51l-.388-.23-4.083 1.075 1.075-3.97-.244-.402a9.94 9.94 0 0 1-1.547-5.328c0-5.508 4.483-9.992 9.992-9.992 2.665 0 5.17 1.04 7.057 2.926a9.92 9.92 0 0 1 2.92 7.066c0 5.51-4.484 9.964-9.992 9.964zm3.01-8.925c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.315-.1c-.802-.402-1.504-.817-2.163-1.447-.545-.516-1.146-1.29-1.46-1.963a.426.426 0 0 1-.073-.215c0-.33.99-.945.99-1.49 0-.143-.73-2.09-.832-2.335-.143-.372-.214-.487-.6-.487-.187 0-.36-.043-.53-.043-.302 0-.53.115-.746.315-.688.645-1.032 1.318-1.06 2.264v.114c-.014.99.36 1.853.832 2.696 1.13 2.035 2.535 3.79 4.484 5.044.616.4 2.087 1.092 2.847 1.092.832 0 1.49-.42 1.69-1.075.1-.345.115-.674.115-.992 0-.43-1.69-1.46-2.063-1.46z' },
+  call: { vb: '0 0 24 24', d: 'M5 3.5h3.2l1.6 4.3-2.1 1.4a11 11 0 0 0 5.1 5.1l1.4-2.1 4.3 1.6V17a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 5.5a2 2 0 0 1 2-2z' },
+  email: { vb: '0 0 24 24', d: 'M3.5 6.5h17v11h-17z M3.8 6.8 12 13l8.2-6.2' },
+  instagram: { vb: '0 0 24 24', d: 'M7 3.5h10A3.5 3.5 0 0 1 20.5 7v10a3.5 3.5 0 0 1-3.5 3.5H7A3.5 3.5 0 0 1 3.5 17V7A3.5 3.5 0 0 1 7 3.5z M12 8.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6z M17.2 6.6h.01' },
+}
+
 const rows = [
-  { k: 'WhatsApp', v: phone, href: waUrl(), ext: true },
-  { k: 'Call', v: phone, href: `tel:+${site.whatsapp}` },
-  { k: 'Email', v: site.email, href: `mailto:${site.email}` },
-  { k: 'Instagram', v: insta.handle, href: insta.url, ext: true },
+  { k: 'WhatsApp', v: phone, href: waUrl(), ext: true, icon: ICONS.whatsapp, wa: true },
+  { k: 'Call', v: phone, href: `tel:+${site.whatsapp}`, icon: ICONS.call },
+  { k: 'Email', v: site.email, href: `mailto:${site.email}`, icon: ICONS.email },
+  { k: 'Instagram', v: insta.handle, href: insta.url, ext: true, icon: ICONS.instagram },
 ]
 
 let xTo, yTo, ixTo, iyTo
@@ -79,7 +87,19 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
     <ul class="c-rows">
       <li v-for="(r, i) in rows" :key="r.k" v-reveal="i * 90">
         <a :href="r.href" :target="r.ext ? '_blank' : undefined" :rel="r.ext ? 'noopener' : undefined" class="c-row">
-          <span class="label">{{ r.k }}</span>
+          <span class="c-ico" :class="{ 'c-ico--wa': r.wa }" aria-hidden="true">
+            <svg :viewBox="r.icon.vb" width="22" height="22">
+              <path
+                :d="r.icon.d"
+                :fill="r.icon.fill ? 'currentColor' : 'none'"
+                :stroke="r.icon.fill ? 'none' : 'currentColor'"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="label c-key">{{ r.k }}</span>
           <span class="c-val">
             <span class="roll"><span>{{ r.v }}</span><span aria-hidden="true">{{ r.v }}</span></span>
           </span>
@@ -179,7 +199,7 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
 
 .c-row {
   display: grid;
-  grid-template-columns: 10rem 1fr auto;
+  grid-template-columns: auto 8rem 1fr auto;
   align-items: center;
   gap: var(--gutter);
   padding: clamp(18px, 2.4vw, 30px) 0;
@@ -191,10 +211,46 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
   padding-left: clamp(8px, 1.2vw, 18px);
 }
 
+.c-ico {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  color: var(--fg);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease;
+}
+
+.c-ico--wa {
+  color: var(--wa);
+  border-color: rgba(37, 211, 102, 0.45);
+}
+
+.c-row:hover .c-ico {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+.c-row:hover .c-ico--wa {
+  background: var(--wa);
+  color: var(--wa-ink);
+  border-color: var(--wa);
+}
+
+/* the clean text face with even-width figures: numbers and the email
+   read clearly at any size (the display serif's hairlines didn't) */
 .c-val {
-  font-family: var(--serif);
-  font-size: clamp(1.5rem, 3.4vw, 3.2rem);
-  letter-spacing: -0.025em;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 2.4vw, 2.1rem);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--fg);
   overflow-wrap: anywhere;
 }
 
@@ -250,18 +306,33 @@ onUnmounted(() => gsap.killTweensOf(disc.value))
     margin-top: 32px;
   }
   .c-row {
-    grid-template-columns: 1fr auto;
-    row-gap: 0.25rem;
-    min-height: 64px;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 14px;
+    row-gap: 0.2rem;
+    min-height: 72px;
   }
   .c-row:hover {
     padding-left: 0;
   }
-  .c-row .label {
-    grid-column: 1 / -1;
+  .c-ico {
+    grid-row: 1 / 3;
+    width: 44px;
+    height: 44px;
+  }
+  .c-key {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
   }
   .c-val {
-    font-size: clamp(1.4rem, 6.4vw, 2rem);
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    font-size: clamp(1.1rem, 5vw, 1.4rem);
+  }
+  .c-arrow {
+    grid-column: 3;
+    grid-row: 1 / 3;
   }
 }
 </style>
